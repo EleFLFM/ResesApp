@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "95256058489",
+    "firebase_url": "https://reses-a5684-default-rtdb.firebaseio.com",
+    "project_id": "reses-a5684",
+    "storage_bucket": "reses-a5684.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95256058489:android:838b9bcf69a91fc9e312a8",
+        "android_client_info": {
+          "package_name": "com.example.reses"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMwee0e4GvgJxWrCjgrwG1mEZO8NVA-es"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95256058489:android:defd1001c82f1243e312a8",
+        "android_client_info": {
+          "package_name": "com.example.reses10"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMwee0e4GvgJxWrCjgrwG1mEZO8NVA-es"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
