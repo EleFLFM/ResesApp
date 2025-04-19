@@ -117,12 +117,13 @@
             android:text="Eliminar"
             android:onClick="DeleteReses"
             android:textColor="#ffffff" />
+
         <Button
             android:id="@+id/goback"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Regresar"
             android:onClick="GoBackListaBovinoDesdeGestion"
+            android:text="Regresar"
             android:textColor="#ffffff" />
     </LinearLayout>
 </ScrollView>

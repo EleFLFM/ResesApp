@@ -16,123 +16,192 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class GestiondeReses extends AppCompatActivity {
+    private EditText Chapeta, Nombre, Padre, Madre, FechaNacimiento;
+    private RadioButton Macho, Hembra;
+    private String cedula, tiporesesaux, chapetaaux, id;
+    private DatabaseReference databaseReference;
 
-    private EditText Chapeta;
-    private EditText Nombre;
-    private EditText Padre;
-    private EditText Madre;
-    private RadioButton Macho;
-    String cedula,tiporesesaux;
-    private DatabaseHelper dbHelper;
-    private RadioButton Hembra;
-    String chapetaaux;
-    private EditText FechaNacimiento;
-    String id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_gestionde_reses);
-        dbHelper = new DatabaseHelper(this);
+
+        // Inicializar Firebase
+        databaseReference = FirebaseDatabase.getInstance().getReference("reses");
+
+        // Obtener datos del Intent
         Intent intent = getIntent();
         cedula = intent.getStringExtra("cedula");
         tiporesesaux = intent.getStringExtra("tiporeses");
         id = intent.getStringExtra("id");
-        Chapeta=findViewById(R.id.chapetaEditText);
-        Nombre=findViewById(R.id.nombreEditText);
-        Padre=findViewById(R.id.padreEditText);
-        Madre=findViewById(R.id.madreEditText);
-        Macho=findViewById(R.id.machoButton);
-        Hembra=findViewById(R.id.hembraButton);
-        FechaNacimiento=findViewById(R.id.fechaEditText);
 
-        FechaNacimiento.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar calendar = Calendar.getInstance();
-                int year = calendar.get(Calendar.YEAR);
-                int month = calendar.get(Calendar.MONTH);
-                int day = calendar.get(Calendar.DAY_OF_MONTH);
-                DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        v.getContext(),
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int selectedYear, int selectedMonth, int selectedDay) {
-                                String fecha = selectedYear + "/" + String.format("%02d", (selectedMonth + 1)) + "/" + String.format("%02d", selectedDay);
-                                FechaNacimiento.setText(fecha);
-                            }
-                        },
-                        year, month, day
-                );
-                datePickerDialog.show();
-            }
-        });
+        // Inicializar vistas
+        Chapeta = findViewById(R.id.chapetaEditText);
+        Nombre = findViewById(R.id.nombreEditText);
+        Padre = findViewById(R.id.padreEditText);
+        Madre = findViewById(R.id.madreEditText);
+        Macho = findViewById(R.id.machoButton);
+        Hembra = findViewById(R.id.hembraButton);
+        FechaNacimiento = findViewById(R.id.fechaEditText);
 
-        List<Map<String, String>> resultado=dbHelper.SearchSQL("select * from Reses where Id='"+id+"'");
-        Chapeta.setText(resultado.get(0).get("Chapeta"));
-        Nombre.setText(resultado.get(0).get("Nombre"));
-        Padre.setText(resultado.get(0).get("Padre"));
-        Madre.setText(resultado.get(0).get("Madre"));
-        Macho.setChecked(resultado.get(0).get("TipoBovino").toString().equals("Macho"));
-        Hembra.setChecked(resultado.get(0).get("TipoBovino").toString().equals("Hembra"));
-        FechaNacimiento.setText(resultado.get(0).get("FechaNacimiento"));
-        chapetaaux=Chapeta.getText().toString();
+        // Configurar date picker
+        FechaNacimiento.setOnClickListener(v -> showDatePicker());
+
+        // Cargar datos de la res
+        loadResData();
     }
 
-    public void GoBackListaBovinoDesdeGestion(View view){
-        Intent intent=new Intent(GestiondeReses.this, Reses.class);
-        intent.putExtra("cedula",cedula);
-        intent.putExtra("tiporeses",tiporesesaux);
+    private void showDatePicker() {
+        final Calendar calendar = Calendar.getInstance();
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, day) -> {
+                    String fecha = year + "/" + String.format("%02d", (month + 1)) + "/" + String.format("%02d", day);
+                    FechaNacimiento.setText(fecha);
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
+    }
+
+    private void loadResData() {
+        databaseReference.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Chapeta.setText(snapshot.child("chapeta").getValue(String.class));
+                    Nombre.setText(snapshot.child("nombre").getValue(String.class));
+                    Padre.setText(snapshot.child("padre").getValue(String.class));
+                    Madre.setText(snapshot.child("madre").getValue(String.class));
+                    String sexo = snapshot.child("sexo").getValue(String.class);
+                    Macho.setChecked("Macho".equals(sexo));
+                    Hembra.setChecked("Hembra".equals(sexo));
+                    FechaNacimiento.setText(snapshot.child("fechaNacimiento").getValue(String.class));
+                    chapetaaux = Chapeta.getText().toString();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Toast.makeText(GestiondeReses.this, "Error al cargar datos", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void GoBackListaBovinoDesdeGestion(View view) {
+        Intent intent = new Intent(this, Reses.class);
+        intent.putExtra("cedula", cedula);
+        intent.putExtra("tiporeses", tiporesesaux);
         startActivity(intent);
         finish();
     }
-    public void DeleteReses(View view){
+
+    public void DeleteReses(View view) {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmación")
-                .setMessage("¿Está seguro de querer borrar su cuenta y los registros de sus reses?")
-                .setPositiveButton("Sí", (dialog, which) -> {
-                    if(dbHelper.borrarDatos(id,"Reses", "Id")) {
-                        Toast.makeText(this, "Bovino eliminado exitosamente", Toast.LENGTH_SHORT).show();
-                        GoBackListaBovinoDesdeGestion(view);
-                    }else{
-                        Toast.makeText(this, "Error al borrar las reses", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .setNegativeButton("No", (dialog, which) -> {
-                    dialog.dismiss();
-                })
+                .setMessage("¿Está seguro de querer eliminar este bovino?")
+                .setPositiveButton("Sí", (dialog, which) -> deleteResFromFirebase())
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                 .show();
     }
-    public void ActualizarReses(View view) {
-        if (Nombre.getText().toString().isEmpty() || Padre.getText().toString().isEmpty() || Madre.getText().toString().isEmpty() || FechaNacimiento.getText().toString().isEmpty()) {
-            Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
-        } else {
-            String fechaactual=java.time.LocalDate.now().toString().replace("-", "/");
-            if (fechaactual.compareTo(FechaNacimiento.getText().toString()) >= 0) {
-                if (dbHelper.SearchSQL("select * from Reses where Chapeta='" + Chapeta.getText().toString() + "' COLLATE NOCASE and UsuarioFk='" + cedula + "'").isEmpty() ||
-                        chapetaaux.equalsIgnoreCase(Chapeta.getText().toString())) {
-                    long newRowId = dbHelper.updateReses(id, Chapeta.getText().toString(), Nombre.getText().toString(),
-                            Padre.getText().toString(), Madre.getText().toString(), (Macho.isChecked() ? "Macho" : "Hembra"), FechaNacimiento.getText().toString(), cedula);
 
-                    if (newRowId == -1) {
-                        Toast.makeText(this, "Error en el registro, datos no válidos", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Bovino actualizado exitosamente", Toast.LENGTH_SHORT).show();
-                        GoBackListaBovinoDesdeGestion(view);
-                    }
-                } else {
-                    Toast.makeText(this, "La chapeta ya fue registrada.", Toast.LENGTH_SHORT).show();
-                }
-            }else{
-                Toast.makeText(this, "Error, la fecha ingresada supera el dia actual.", Toast.LENGTH_SHORT).show();
+    private void deleteResFromFirebase() {
+        databaseReference.child(id).removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Bovino eliminado exitosamente", Toast.LENGTH_SHORT).show();
+                    navigateBackToList();
+                    //finish();
+
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error al eliminar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    public void ActualizarReses(View view) {
+        if (validarCampos()) {
+            String fechaActual = java.time.LocalDate.now().toString().replace("-", "/");
+            if (fechaActual.compareTo(FechaNacimiento.getText().toString()) >= 0) {
+                checkChapetaAndUpdate();
+            } else {
+                Toast.makeText(this, "Error, la fecha ingresada supera el día actual.", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
+    private boolean validarCampos() {
+        if (Nombre.getText().toString().isEmpty() ||
+                Padre.getText().toString().isEmpty() ||
+                Madre.getText().toString().isEmpty() ||
+                FechaNacimiento.getText().toString().isEmpty()) {
 
+            Toast.makeText(this, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private void checkChapetaAndUpdate() {
+        String nuevaChapeta = Chapeta.getText().toString().trim();
+
+        if (chapetaaux.equalsIgnoreCase(nuevaChapeta)) {
+            updateResInFirebase();
+        } else {
+            databaseReference.orderByChild("chapeta").equalTo(nuevaChapeta)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                Toast.makeText(GestiondeReses.this, "La chapeta ya fue registrada.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                updateResInFirebase();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError error) {
+                            Toast.makeText(GestiondeReses.this, "Error al verificar chapeta", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private void updateResInFirebase() {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("chapeta", Chapeta.getText().toString().trim());
+        updates.put("nombre", Nombre.getText().toString().trim());
+        updates.put("padre", Padre.getText().toString().trim());
+        updates.put("madre", Madre.getText().toString().trim());
+        updates.put("sexo", Macho.isChecked() ? "Macho" : "Hembra");
+        updates.put("fechaNacimiento", FechaNacimiento.getText().toString().trim());
+
+        databaseReference.child(id).updateChildren(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Bovino actualizado exitosamente", Toast.LENGTH_SHORT).show();
+                    navigateBackToList();
+//                    finish();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Error al actualizar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+    private void navigateBackToList() {
+        Intent intent = new Intent(this, Reses.class);
+        intent.putExtra("cedula", cedula);
+        intent.putExtra("tiporeses", tiporesesaux);
+        startActivity(intent);
+        finish();
+    }
 }
