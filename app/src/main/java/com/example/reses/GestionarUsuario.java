@@ -79,7 +79,7 @@ public class GestionarUsuario extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-    public void GoBackMenu() {
+      public void GoBackMenu() {
         Intent intent = new Intent(this, Menu.class);
         intent.putExtra("cedula", cedula);
         startActivity(intent);
