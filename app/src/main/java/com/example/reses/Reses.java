@@ -93,10 +93,7 @@ public class Reses extends AppCompatActivity {
     }
 
     private void loadReses() {
-        Query query;
-
-        // Base query - filter by user ID (cedula)
-        query = databaseReference.orderByChild("usuarioFk").equalTo(cedula);
+        Query query = databaseReference.orderByChild("usuarioFk").equalTo(cedula);
 
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -108,11 +105,11 @@ public class Reses extends AppCompatActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     GettersReses res = createResesFromSnapshot(snapshot);
 
-                    // First filter: by type of cattle (if not "Todos")
+                    // Filtro principal por SEXO (no por tipoRes)
                     boolean matchesType = tiporesesaux.equalsIgnoreCase("Todos") ||
-                            tiporesesaux.equalsIgnoreCase(res.getTipoRes());
+                            res.getSexo().equalsIgnoreCase(tiporesesaux);
 
-                    // Second filter: by search text (if provided)
+                    // Filtro secundario por búsqueda
                     boolean matchesSearch = searchText.isEmpty() ||
                             res.getNombre().toLowerCase().contains(searchText);
 

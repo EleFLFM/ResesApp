@@ -22,6 +22,7 @@ public class GettersReses {
         this.padre = padre;
     }
 
+
     // Constructor for simplified usage
     public GettersReses(String id, String nombre, String sexo) {
         this.id = id;

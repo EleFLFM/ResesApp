@@ -45,6 +45,7 @@ public class ResesAdapter extends ArrayAdapter<GettersReses> {
         nombreTextView.setText(reses.getNombre());
 
         // Display sexo instead of tipoBovino/tipoRes
+        // En ResesAdapter, muestra ambos campos para debug
         tipoBovinoTextView.setText(reses.getSexo());
 
         convertView.setOnClickListener(new View.OnClickListener() {
