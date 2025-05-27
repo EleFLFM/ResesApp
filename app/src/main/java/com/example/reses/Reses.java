@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,7 +22,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Reses extends AppCompatActivity {
 
@@ -75,9 +75,6 @@ public class Reses extends AppCompatActivity {
             }
         });
 
-        // Sincronizar cantidades
-        SincronizarCantidades();
-
         // Listener para búsqueda
         derechoaux.addTextChangedListener(new TextWatcher() {
             @Override
@@ -87,7 +84,6 @@ public class Reses extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 loadReses();
-                SincronizarCantidades();
             }
 
             @Override
@@ -96,26 +92,55 @@ public class Reses extends AppCompatActivity {
         });
     }
 
-    public void SincronizarCantidades() {
-        Query query;
-        if (tiporesesaux.equalsIgnoreCase("Todos")) {
-            query = databaseReference.orderByChild("usuarioFk").equalTo(cedula);
-        } else {
-            query = databaseReference.orderByChild("usuarioFk_tipoRes").equalTo(cedula + "_" + tiporesesaux);
-        }
+    private void loadReses() {
+        Query query = databaseReference.orderByChild("usuarioFk").equalTo(cedula);
 
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        query.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                long count = dataSnapshot.getChildrenCount();
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                resesList.clear();
+                String searchText = derechoaux.getText().toString().trim().toLowerCase();
+                int count = 0;
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    GettersReses res = createResesFromSnapshot(snapshot);
+
+                    // Filtro principal por SEXO (no por tipoRes)
+                    boolean matchesType = tiporesesaux.equalsIgnoreCase("Todos") ||
+                            res.getSexo().equalsIgnoreCase(tiporesesaux);
+
+                    // Filtro secundario por búsqueda
+                    boolean matchesSearch = searchText.isEmpty() ||
+                            res.getNombre().toLowerCase().contains(searchText);
+
+                    if (matchesType && matchesSearch) {
+                        resesList.add(res);
+                        count++;
+                    }
+                }
+
+                adapter.notifyDataSetChanged();
                 izquierdoaux.setText("Bovinos: " + count);
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(Reses.this, "Error al contar reses: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(Reses.this, "Error al cargar reses: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private GettersReses createResesFromSnapshot(DataSnapshot snapshot) {
+        String id = snapshot.getKey();
+        String nombre = snapshot.child("nombre").getValue(String.class);
+        String sexo = snapshot.child("sexo").getValue(String.class);
+        String tipoRes = snapshot.child("tipoRes").getValue(String.class);
+        String fechaNacimiento = snapshot.child("fechaNacimiento").getValue(String.class);
+        String madre = snapshot.child("madre").getValue(String.class);
+        String padre = snapshot.child("padre").getValue(String.class);
+
+        // Create a complete GettersReses object with all relevant fields
+        return new GettersReses(id, nombre, sexo, tipoRes, fechaNacimiento, madre, padre);
     }
 
     public void GoBackMenu(View view) {
@@ -129,90 +154,5 @@ public class Reses extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadReses();
-    }
-//    private void loadReses() {
-//        Query query;
-//        String searchText = derechoaux.getText().toString().trim();
-//
-//        // Simplificamos la consulta ya que no necesitamos filtrar por tipo
-//        query = databaseReference.orderByChild("usuarioFk").equalTo(cedula);
-//
-//        query.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                resesList.clear();
-//                String searchText = derechoaux.getText().toString().trim().toLowerCase();
-//
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    String nombre = snapshot.child("nombre").getValue(String.class);
-//                    String sexo = snapshot.child("sexo").getValue(String.class);
-//                    String id = snapshot.getKey();
-//
-//                    // Filtramos solo por texto de búsqueda
-//                    if (searchText.isEmpty() || nombre.toLowerCase().contains(searchText)) {
-//                        GettersReses res = new GettersReses(id, nombre, sexo);
-//                        resesList.add(res);
-//                    }
-//                }
-//                adapter.notifyDataSetChanged();
-//                SincronizarCantidades();
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Toast.makeText(Reses.this, "Error al cargar reses: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
-    private void loadReses() {
-        Query query;
-        String searchText = derechoaux.getText().toString().trim();
-
-        if (searchText.isEmpty()) {
-            // Consulta sin filtro de búsqueda
-            if (tiporesesaux.equalsIgnoreCase("Todos")) {
-                query = databaseReference.orderByChild("usuarioFk").equalTo(cedula);
-            } else {
-                query = databaseReference.orderByChild("usuarioFk_tipoRes").equalTo(cedula + "_" + tiporesesaux);
-            }
-        } else {
-            // Consulta con filtro de búsqueda por nombre
-            if (tiporesesaux.equalsIgnoreCase("Todos")) {
-                query = databaseReference.orderByChild("usuarioFk").equalTo(cedula);
-            } else {
-                query = databaseReference.orderByChild("usuarioFk_tipoRes").equalTo(cedula + "_" + tiporesesaux);
-            }
-        }
-
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                resesList.clear();
-                String searchText = derechoaux.getText().toString().trim().toLowerCase();
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String nombre = snapshot.child("nombre").getValue(String.class);
-                    String tipoRes = snapshot.child("tipoRes").getValue(String.class);
-                    String id = snapshot.getKey();
-
-                    // Filtrar por texto de búsqueda si es necesario
-                    if (searchText.isEmpty() || nombre.toLowerCase().contains(searchText)) {
-                        if (tiporesesaux.equalsIgnoreCase("Todos") ||
-                                tiporesesaux.equalsIgnoreCase(tipoRes)) {
-
-                            GettersReses res = new GettersReses(id, nombre, tipoRes);
-                            resesList.add(res);
-                        }
-                    }
-                }
-                adapter.notifyDataSetChanged();
-                SincronizarCantidades();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(Reses.this, "Error al cargar reses: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }
