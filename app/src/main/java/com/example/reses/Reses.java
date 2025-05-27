@@ -31,6 +31,7 @@ public class Reses extends AppCompatActivity {
     private ResesAdapter adapter;
     private EditText izquierdoaux, derechoaux;
     private String tiporesesaux, cedula;
+    private String imagenUrl;  // o el nombre que uses para la imagen
 
     private DatabaseReference databaseReference;
 
@@ -138,9 +139,9 @@ public class Reses extends AppCompatActivity {
         String fechaNacimiento = snapshot.child("fechaNacimiento").getValue(String.class);
         String madre = snapshot.child("madre").getValue(String.class);
         String padre = snapshot.child("padre").getValue(String.class);
+        String imagenUrl = snapshot.child("imagenUrl").getValue(String.class);
+        return new GettersReses(id, nombre, sexo, tipoRes, fechaNacimiento, madre, padre, imagenUrl);
 
-        // Create a complete GettersReses object with all relevant fields
-        return new GettersReses(id, nombre, sexo, tipoRes, fechaNacimiento, madre, padre);
     }
 
     public void GoBackMenu(View view) {

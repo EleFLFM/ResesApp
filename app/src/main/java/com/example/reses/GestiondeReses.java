@@ -6,16 +6,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,7 +23,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class GestiondeReses extends AppCompatActivity {
@@ -32,10 +30,12 @@ public class GestiondeReses extends AppCompatActivity {
     private RadioButton Macho, Hembra;
     private String cedula, tiporesesaux, chapetaaux, id;
     private DatabaseReference databaseReference;
+    private ImageView imageViewRes; // Agrega esta variable
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_gestionde_reses);
 
         // Inicializar Firebase
@@ -55,6 +55,7 @@ public class GestiondeReses extends AppCompatActivity {
         Macho = findViewById(R.id.machoButton);
         Hembra = findViewById(R.id.hembraButton);
         FechaNacimiento = findViewById(R.id.fechaEditText);
+        imageViewRes = findViewById(R.id.imageViewRes); // Inicializa el ImageView
 
         // Configurar date picker
         FechaNacimiento.setOnClickListener(v -> showDatePicker());
@@ -62,7 +63,6 @@ public class GestiondeReses extends AppCompatActivity {
         // Cargar datos de la res
         loadResData();
     }
-
     private void showDatePicker() {
         final Calendar calendar = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(
@@ -92,6 +92,18 @@ public class GestiondeReses extends AppCompatActivity {
                     Hembra.setChecked("Hembra".equals(sexo));
                     FechaNacimiento.setText(snapshot.child("fechaNacimiento").getValue(String.class));
                     chapetaaux = Chapeta.getText().toString();
+
+                    // Cargar la imagen si existe
+                    String imageUrl = snapshot.child("imageUrl").getValue(String.class);
+                    if (imageUrl != null && !imageUrl.isEmpty()) {
+                        // Reemplazar las barras invertidas escapadas
+                        String cleanUrl = imageUrl.replace("\\/", "/");
+                        Glide.with(GestiondeReses.this)
+                                .load(cleanUrl)
+                                .placeholder(R.drawable.calavera)
+                                .error(R.drawable.calavera)
+                                .into(imageViewRes);
+                    }
                 }
             }
 

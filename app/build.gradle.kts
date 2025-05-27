@@ -39,7 +39,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-database-ktx") // Usa esta en lugar de la específica
     implementation("com.google.firebase:firebase-analytics-ktx")
-
+    implementation ("com.squareup.okhttp3:okhttp:4.9.1") // Para las llamadas a la API de ImgBB
+    implementation ("com.github.bumptech.glide:glide:4.12.0") // Para cargar imágenes desde URL
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
