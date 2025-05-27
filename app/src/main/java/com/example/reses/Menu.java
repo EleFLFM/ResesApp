@@ -28,24 +28,28 @@ public class Menu extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-    public void ViewMachos(View view){
-        Intent intent=new Intent(Menu.this, Reses.class);
+    public void ViewMachos(View view) {
+        Intent intent = new Intent(Menu.this, Reses.class);
         intent.putExtra("tiporeses", "Macho");
-        intent.putExtra("cedula",cedula);
+        intent.putExtra("cedula", cedula);
+        intent.putExtra("isSpecificView", true); // Nuevo parámetro
         startActivity(intent);
         finish();
     }
-    public void ViewHembras(View view){
-        Intent intent=new Intent(Menu.this, Reses.class);
+    public void ViewHembras(View view) {
+        Intent intent = new Intent(Menu.this, Reses.class);
         intent.putExtra("tiporeses", "Hembra");
-        intent.putExtra("cedula",cedula);
+        intent.putExtra("cedula", cedula);
+        intent.putExtra("isSpecificView", true); // Nuevo parámetro
         startActivity(intent);
         finish();
     }
-    public void ViewAll(View view){
-        Intent intent=new Intent(Menu.this, Reses.class);
+
+    public void ViewAll(View view) {
+        Intent intent = new Intent(Menu.this, Reses.class);
         intent.putExtra("tiporeses", "Todos");
-        intent.putExtra("cedula",cedula);
+        intent.putExtra("cedula", cedula);
+        intent.putExtra("isSpecificView", false); // Nuevo parámetro
         startActivity(intent);
         finish();
     }

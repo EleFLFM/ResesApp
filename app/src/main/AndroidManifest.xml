@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.CAMERA"/>
 
-    <!-- Opcional para diagnóstico en desarrollo -->
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- Opcional para diagnóstico en desarrollo -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -19,13 +23,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Reses"
         android:usesCleartextTraffic="true"
-    tools:targetApi="31">
+        tools:targetApi="31">
+        <activity
+            android:name=".ResesMachoActivity"
+            android:exported="false" />
+
         <meta-data
             android:name="firebase_database_url"
             android:value="https://tu-proyecto.firebaseio.com" />
         <meta-data
             android:name="com.google.firebase.database.logEnabled"
             android:value="true" />
+
         <activity
             android:name=".GestiondeReses"
             android:exported="false" />
@@ -53,6 +62,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name="com.google.firebase.components.ComponentDiscoveryService"
             android:exported="false">

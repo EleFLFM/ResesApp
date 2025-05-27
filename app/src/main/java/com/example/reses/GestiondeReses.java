@@ -171,7 +171,7 @@ public class GestiondeReses extends AppCompatActivity {
                         String cleanUrl = imageUrl.replace("\\/", "/");
                         Glide.with(GestiondeReses.this)
                                 .load(cleanUrl)
-                                .placeholder(R.drawable.calaverap)
+                                .placeholder(R.drawable.calavera)
                                 .error(R.drawable.calavera)
                                 .into(imageViewRes);
                     }
@@ -259,7 +259,7 @@ public class GestiondeReses extends AppCompatActivity {
             }
         });
     }
-    
+
 
     private boolean validarCampos() {
         if (Nombre.getText().toString().isEmpty() ||

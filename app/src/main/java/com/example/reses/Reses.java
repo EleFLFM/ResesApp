@@ -31,6 +31,7 @@ public class Reses extends AppCompatActivity {
     private ResesAdapter adapter;
     private EditText izquierdoaux, derechoaux;
     private String tiporesesaux, cedula;
+    private boolean isSpecificView;
     private String imagenUrl;  // o el nombre que uses para la imagen
 
     private DatabaseReference databaseReference;
@@ -49,7 +50,7 @@ public class Reses extends AppCompatActivity {
         Intent intent = getIntent();
         tiporesesaux = intent.getStringExtra("tiporeses");
         cedula = intent.getStringExtra("cedula");
-
+        isSpecificView = intent.getBooleanExtra("isSpecificView", false);
         // Inicializar vistas
         resesListView = findViewById(R.id.resesListView);
         izquierdoaux = findViewById(R.id.editTextIzquierdo);
@@ -71,6 +72,7 @@ public class Reses extends AppCompatActivity {
                 Intent intent = new Intent(Reses.this, AgregarReses.class);
                 intent.putExtra("cedula", cedula);
                 intent.putExtra("tiporeses", tiporesesaux);
+                intent.putExtra("isSpecificView", isSpecificView); // Pasar el parámetro
                 startActivity(intent);
                 finish();
             }

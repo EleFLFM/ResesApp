@@ -17,6 +17,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -50,6 +51,8 @@ public class AgregarReses extends AppCompatActivity {
 
     private String cedula, tiporesesaux;
     private DatabaseReference databaseReference;
+    private boolean isSpecificView;
+    private RadioGroup radioGroupSexo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +68,7 @@ public class AgregarReses extends AppCompatActivity {
         Intent intent = getIntent();
         cedula = intent.getStringExtra("cedula");
         tiporesesaux = intent.getStringExtra("tiporeses");
+        isSpecificView = intent.getBooleanExtra("isSpecificView", false);
 
         // Inicializar vistas
         Chapeta = findViewById(R.id.chapetaEditText);
@@ -74,7 +78,7 @@ public class AgregarReses extends AppCompatActivity {
         Macho = findViewById(R.id.machoButton);
         FechaNacimiento = findViewById(R.id.fechaEditText);
         imageViewRes = findViewById(R.id.imageViewRes);
-
+        radioGroupSexo =findViewById(R.id.radioGroupSexo);
         FechaNacimiento.setOnClickListener(v -> {
             final Calendar calendar = Calendar.getInstance();
             int year = calendar.get(Calendar.YEAR);
@@ -90,6 +94,18 @@ public class AgregarReses extends AppCompatActivity {
             );
             datePickerDialog.show();
         });
+        // Configurar visibilidad de RadioGroup según el origen
+        if (isSpecificView) {
+            radioGroupSexo.setVisibility(View.GONE); // Oculta los RadioButtons
+            // Establece el sexo automáticamente
+            if ("Macho".equals(tiporesesaux)) {
+                Macho.setChecked(true);
+            } else {
+                ((RadioButton) findViewById(R.id.hembraButton)).setChecked(true);
+            }
+        } else {
+            radioGroupSexo.setVisibility(View.VISIBLE); // Muestra los RadioButtons
+        }
 
         // Solicitar permisos si es necesario
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
@@ -189,7 +205,8 @@ public class AgregarReses extends AppCompatActivity {
         String nombre = Nombre.getText().toString().trim();
         String padre = Padre.getText().toString().trim();
         String madre = Madre.getText().toString().trim();
-        String sexo = Macho.isChecked() ? "Macho" : "Hembra";
+        String sexo = isSpecificView ? tiporesesaux : (Macho.isChecked() ? "Macho" : "Hembra");
+
         String fechaNacimiento = FechaNacimiento.getText().toString().trim();
 
         databaseReference.orderByChild("chapeta").equalTo(chapeta)

@@ -87,6 +87,7 @@
             android:orientation="horizontal"
             android:padding="8dp">
             <RadioGroup
+                android:id="@+id/radioGroupSexo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <RadioButton
